@@ -78,7 +78,7 @@ class Relay extends ModuleBase {
 		if(this._port(port)) // check port is available
 			return {ok: false, msg: "port " + port + " is busy"};
 
-		let uid = this._uid(); // gen server id
+		let uid = this._uid(); // gen server uid
 		this.pipes.set(uid, new Set()); // init pipes
 		this.datas.set(uid, (socket, data) => this._data(uid, socket, data)); // data callback
 		let serverClass = this.constructors.get(type), server = new serverClass(port, this.datas.get(uid)); // start server
