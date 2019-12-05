@@ -14,11 +14,11 @@ class IOServer {
 		this._server = io(port, {});
 		this._server.on("connection", this.onConnect.bind(this));
 		this._server.on("error", this.onError.bind(this));
-		this._server.attach(3000, {
+		/*this._server.attach(3000, {
 			pingInterval: 10000,
 			pingTimeout: 5000,
 			cookie: false
-		});
+		});*/
 		trace("IO server start", this._port);
 	}
 
