@@ -25,24 +25,10 @@ class Relay extends ModuleBase {
 			["ws", WSServer]
 		]);
 
-		//this._test();
-	}
-
-	_test() {
-
-		let tcp = this._start("tcp", 55555);
-		console.log("tcp", tcp);
-		let ws = this._start("ws", 55556);
-		console.log("ws", ws);
-
-		let pipe = this._pipe(tcp.uid, ws.uid);
-		console.log("pipe", pipe);
-
-		let around = this._pipe(ws.uid, tcp.uid);
-		console.log("pipe", around);
-
-		console.log("check", this._port(55556));
-
+		setTimeout(() => {
+			let testClass = require("./test.js");
+			new testClass(this);
+		}, 2500);
 	}
 
 	/**
@@ -82,7 +68,7 @@ class Relay extends ModuleBase {
 		this.pipes.set(uid, new Set()); // init pipes
 		this.datas.set(uid, (socket, data) => this._data(uid, socket, data)); // data callback
 		let serverClass = this.constructors.get(type), server = new serverClass(port, this.datas.get(uid)); // start server
-		this.points.set(uid, server); // keep ref
+		this.points.set(uid, server); // keep server ref
 		return {ok: true, msg: "server started", uid: uid, type: type, port: port};
 	}
 
@@ -117,6 +103,8 @@ class Relay extends ModuleBase {
 	 */
 	_pipe(from, to) {
 		if(this.points.has(from)) { // check origin exists
+			if(from === to)  // check not piping to self
+				return {ok: false, msg: "no black hole please", from: from, to: to};
 			if(this.pipes.get(from).has(to)) // check not already piped
 				return {ok: false, msg: "already piped", from: from, to: to};
 			else {
@@ -174,7 +162,10 @@ class Relay extends ModuleBase {
 	 */
 	_data(uid, socket, data) {
 		// do something with data before dispatch ?
-		this.pipes.get(uid).forEach(pipeuid => this.points.get(pipeuid).all(data)); // pipe data
+		this.pipes.get(uid).forEach(pipeuid => { // pipe data
+			trace("pipe to", pipeuid);
+			this.points.get(pipeuid).all(data); // send to all pipe clients
+		});
 	}
 
 	/**
