@@ -12,85 +12,90 @@ class RelayTest {
 	}
 
 	_wait(ms = 500) {
-		trace("");
+		console.log("");
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
 	async _test() {
 
-		trace("test relay");
+		console.log("test relay");
 
 		await this._wait();
 
 		let tcp = this.relay._start("tcp", 55555);
-		trace(tcp);
+		console.log(tcp);
 
 		await this._wait();
 
 		let io = this.relay._start("io", 55556);
-		trace(io);
+		console.log(io);
 
 		await this._wait();
 
 		let udp = this.relay._start("udp", 55557);
-		trace(udp);
+		console.log(udp);
 
 		await this._wait();
 
 		let ws = this.relay._start("ws", 55558);
-		trace(ws);
+		console.log(ws);
 
 		await this._wait();
 
 		let tcptoio = this.relay._pipe(tcp.uid, io.uid);
-		trace("pipe", tcptoio);
+		console.log("pipe", tcptoio);
+
 		let iototcp = this.relay._pipe(io.uid, tcp.uid);
-		trace("pipe", iototcp);
+		console.log("pipe", iototcp);
+
 		let udptotcp = this.relay._pipe(udp.uid, tcp.uid);
-		trace("pipe", udptotcp);
+		console.log("pipe", udptotcp);
+
 		let tcptoudp = this.relay._pipe(tcp.uid, udp.uid);
-		trace("pipe", tcptoudp);
+		console.log("pipe", tcptoudp);
+
 		let tcptows = this.relay._pipe(tcp.uid, ws.uid);
-		trace("pipe", tcptows);
+		console.log("pipe", tcptows);
+		
 		let wstotcp = this.relay._pipe(ws.uid, tcp.uid);
-		trace("pipe", wstotcp);
+		console.log("pipe", wstotcp);
 
 		await this._wait();
 
-		trace("check", this.relay._port(55556));
+		console.log("check", this.relay._port(55556));
 
 		await this._wait();
 
 		let tcpclient = new TCPClient("localhost", 55555,
-			() => trace("tcp client connect"),
-			data => trace("tcp client data :", data),
-			() => trace("tcp client disconnect"),
-			err => trace("tcp client error :", err)
+			() => console.log("tcp client connect"),
+			data => console.log("tcp client data :", data),
+			() => console.log("tcp client disconnect"),
+			err => console.log("tcp client error :", err)
 		);
 
 		await this._wait();
 
 		let ioclient = new IOClient("http://localhost", 55556,
-			() => trace("io client connect"),
-			data => trace("io client data :", data),
-			() => trace("io client disconnect"),
-			err => trace("io client error :", err)
+			() => console.log("io client connect"),
+			data => console.log("io client data :", data),
+			() => console.log("io client disconnect"),
+			err => console.log("io client error :", err)
 		);
 
 		await this._wait();
 
 		let udpclient = new UDPClient("localhost", 55557,
-			data => trace("udp client data :", data),
-			err => trace("udp client error :", err)
+			data => console.log("udp client data :", data),
+			err => console.log("udp client error :", err)
 		);
 
 		await this._wait();
 
 		let wsclient = new WSClient("ws://localhost", 55558,
-			() => trace("ws client connect"),
-			data => trace("ws client data :", data),
-			() => trace("ws client disconnect"),
-			err => trace("ws client error :", err)
+			() => console.log("ws client connect"),
+			data => console.log("ws client data :", data),
+			() => console.log("ws client disconnect"),
+			err => console.log("ws client error :", err)
 		);
 
 		await this._wait();

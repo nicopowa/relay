@@ -1,4 +1,4 @@
-const SocketIOClient = outload("socket.io-client");
+const SocketIOClient = require("socket.io-client");
 
 class IOClient {
 
@@ -7,7 +7,7 @@ class IOClient {
 		this._host = host;
 		this._port = port;
 
-		trace("new io client :", this._host + ":" + this._port);
+		console.log("new io client :", this._host + ":" + this._port);
 
 		this._connect = onConnect;
 		this._data = onData;
@@ -22,33 +22,33 @@ class IOClient {
 	}
 
 	onConnect() {
-		//trace("io client connected to :", this._host + ":" + this._port);
+		//console.log("io client connected to :", this._host + ":" + this._port);
 		this._connect();
 	}
 
 	onData(data) {
-		//trace("io client data :", data);
+		//console.log("io client data :", data);
 		this._data(data);
 	}
 
 	onDisconnect() {
-		//trace("io client disconnect");
+		//console.log("io client disconnect");
 		this._disconnect();
 	}
 
 	onError(err) {
-		//trace("io client error", err);
+		//console.log("io client error", err);
 		//this.stop(); // ??
 		this._error(err);
 	}
 
 	send(type, data) {
-		trace("io client send :", type, data);
+		console.log("io client send :", type, data);
 		this._socket.emit(type, data);
 	}
 
 	stop() {
-		trace("io client stop");
+		console.log("io client stop");
 		this._socket.close();
 	}
 

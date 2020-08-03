@@ -1,0 +1,16 @@
+{
+	"_options": {},
+	"_methods": {
+		"check": {}, 
+		"start": {}, 
+		"stop": {}, 
+		"pipe": {}, 
+		"unpipe": {}, 
+		"send": {}
+	},
+	"_dependencies": {
+		"socket.io": "^2.3.0",
+		"socket.io-client": "^2.3.0",
+		"websocket": "^1.0.30"
+	}
+}

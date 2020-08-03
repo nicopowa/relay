@@ -1,4 +1,4 @@
-const WebSocketClient = outload("websocket").client;
+const WebSocketClient	 = require("websocket").client;
 
 class WSClient {
 
@@ -7,7 +7,7 @@ class WSClient {
 		this._host = host;
 		this._port = port;
 
-		trace("new ws client :", this._host + ":" + this._port);
+		console.log("new ws client :", this._host + ":" + this._port);
 
 		this._connect = onConnect;
 		this._data = onData;
@@ -22,7 +22,7 @@ class WSClient {
 	}
 
 	onConnect(connection) {
-		//trace("ws client connected to :", this._host + ":" + this._port);
+		//console.log("ws client connected to :", this._host + ":" + this._port);
 		this._connection = connection;
 		this._connection.on("error", this.onError.bind(this));
 		this._connection.on("close", this.onDisconnect.bind(this));
@@ -32,28 +32,28 @@ class WSClient {
 	}
 
 	onData(data) {
-		//trace("ws client data :", data);
+		//console.log("ws client data :", data);
 		this._data(data);
 	}
 
 	onDisconnect() {
-		//trace("ws client disconnect");
+		//console.log("ws client disconnect");
 		this._disconnect();
 	}
 
 	onError(err) {
-		//trace("ws client error", err);
+		//console.log("ws client error", err);
 		//this.stop(); // ??
 		this._error(err);
 	}
 
 	send(data) {
-		trace("ws client send :", data);
+		console.log("ws client send :", data);
 		this._connection.send(data);
 	}
 
 	stop() {
-		trace("ws client stop");
+		console.log("ws client stop");
 		this._socket.close();
 	}
 

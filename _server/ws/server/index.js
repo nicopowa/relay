@@ -1,5 +1,5 @@
-const Wss = outload("websocket").server;
-const http = require("http");
+const Wss	 = require("websocket").server;
+const http	 = require("http");
 
 class WebSocketServer {
 	
@@ -18,18 +18,18 @@ class WebSocketServer {
 		this._server = new Wss({httpServer: this._http});
 		this._server.on("request", this.onConnect.bind(this));
 
-		trace("ws server start", this._port);
+		console.log("ws server start", this._port);
 
 	}
 
 	onRequest(request, response) {
-		trace("ws http", request.url);
+		console.log("ws http", request.url);
 		response.writeHead(404);
 		response.end();
 	}
 
 	onData(socket, data) {
-		trace("ws data :", socket.name, ">", data);
+		console.log("ws data :", socket.name, ">", data);
 		this._data(socket, data.utf8Data || data.binaryData);
 	}
 
@@ -41,7 +41,7 @@ class WebSocketServer {
 	onConnect(request) {
 		let socket = request.accept("echo-protocol", request.origin);
 		socket.name = socket.remoteAddress + ":" + socket.socket.remotePort;
-		trace("new ws client :", socket.name);
+		console.log("new ws client :", socket.name);
 		socket.on("message", packet => this.onData(socket, packet));
 		socket.on("close", () => this.onDisconnect(socket));
 		this._clients.set(socket.name, socket);
@@ -49,7 +49,7 @@ class WebSocketServer {
 	}
 
 	onDisconnect(socket) {
-		trace("ws disconnected :", socket.name);
+		console.log("ws disconnected :", socket.name);
 		this._clients.delete(socket.name);
 		this._disconnect(socket);
 	}
@@ -59,7 +59,7 @@ class WebSocketServer {
 	}
 
 	all(...args) {
-		trace("ws send all :", args);
+		console.log("ws send all :", args);
 		this._clients.forEach(socket => this.send(socket, ...args));
 	}
 

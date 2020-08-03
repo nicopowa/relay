@@ -7,7 +7,7 @@ class UDPClient {
 		this._host = host;
 		this._port = port;
 
-		trace("new udp client :", this._host + ":" + this._port);
+		console.log("new udp client :", this._host + ":" + this._port);
 
 		this._data = onData;
 		this._error = onError;
@@ -23,24 +23,24 @@ class UDPClient {
 	}
 
 	onData(data) {
-		//trace("udp client data :", data);
+		//console.log("udp client data :", data);
 		this._data(data);
 	}
 
 	onError(err) {
-		//trace("udp client error", err);
+		//console.log("udp client error", err);
 		this._error(err);
 	}
 
 	send(data) {
-		trace("udp client send :", data);
+		console.log("udp client send :", data);
 		this._socket.send(data, this._port, err => {
-			if(err) trace("udp client send error :", err)
+			if(err) console.log("udp client send error :", err)
 		});
 	}
 
 	stop() {
-		trace("udp client stop");
+		console.log("udp client stop");
 		this._socket.close();
 	}
 

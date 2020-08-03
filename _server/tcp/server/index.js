@@ -16,12 +16,12 @@ class TCPServer {
 		this._server.on("error", this.onError.bind(this));
 		this._server.listen(this._port);
 		
-		trace("tcp server start", this._port);
+		console.log("tcp server start", this._port);
 	}
 	
 	onConnect(socket) {
 		socket.name = socket.remoteAddress + ":" + socket.remotePort;
-		trace("new tcp client :", socket.name);
+		console.log("new tcp client :", socket.name);
 		socket.on("data", data => this.onData(socket, data));
 		socket.on("end", () => this.onDisconnect(socket));
 		this._clients.set(socket.name, socket);
@@ -29,12 +29,12 @@ class TCPServer {
 	}
 	
 	onData(socket, data) {
-		trace("tcp data :", socket.name, data);
+		console.log("tcp data :", socket.name, data);
 		this._data(socket, data);
 	}
 	
 	onDisconnect(socket) {
-		trace("tcp disconnected :", socket.name);
+		console.log("tcp disconnected :", socket.name);
 		this._clients.delete(socket.name);
 		this._disconnect(socket);
 	}
@@ -49,12 +49,12 @@ class TCPServer {
 	}
 
 	all(data) {
-		trace("tcp send all :", data);
+		console.log("tcp send all :", data);
 		this._clients.forEach(socket => this.send(socket, data));
 	}
 	
 	stop() {
-		trace("TCP server stop :", this._port);
+		console.log("TCP server stop :", this._port);
 		this._clients.forEach(socket => socket.destroy());
 		this._clients.clear();
 		this._server.close();

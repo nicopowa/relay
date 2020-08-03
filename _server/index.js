@@ -1,14 +1,17 @@
-const ModuleBase = load("com/base");
+const ModuleBase	 = require("@root/files/base/_server/base");
 
-const TCPServer = require("./tcp/server");
-const IOServer = require("./io/server");
-const WSServer = require("./ws/server");
-const UDPServer = require("./udp/server");
+const TCPServer		 = require("./tcp/server");
+const IOServer		 = require("./io/server");
+const WSServer		 = require("./ws/server");
+const UDPServer		 = require("./udp/server");
 
 class Relay extends ModuleBase {
 
 	constructor(app, settings) {
 		super(app, settings);
+	}
+
+	async construct() {
 
 		this.max_points = 50; // max servers (all constructors)
 		this._min_port = 55500; // from port
@@ -18,17 +21,19 @@ class Relay extends ModuleBase {
 		this.pipes = new Map(); // pipes
 		this.datas = new Map(); // data callbacks
 
-		this.constructors = new Map([ // constructors
-			["tcp", TCPServer], 
-			["udp", UDPServer], 
-			["io", IOServer], 
-			["ws", WSServer]
-		]);
+		this.constructors = new Map(Object.entries({ // constructors
+			"tcp": TCPServer, 
+			"udp": UDPServer, 
+			"io": IOServer, 
+			"ws": WSServer
+		}));
 
-		setTimeout(() => {
+		/*setTimeout(() => {
 			let testClass = require("./test.js");
 			new testClass(this);
-		}, 2500);
+		}, 2500);*/
+
+		return this;
 	}
 
 	/**
@@ -39,18 +44,31 @@ class Relay extends ModuleBase {
 		return [...this.points.values()].filter(point => point.port === port).length === 1;
 	}
 
+	/**
+	 * @method check : 
+	 * @param {http.Request} req : 
+	 * @param {http.Response} res : 
+	 * @param {number} port : 
+	 */
 	check(req, res, port) {
-		this.sendJSON(req, res, 200, {ok: true, msg: this._port(port) ? "busy" : "available", port: port});
+		this.send200(res, {ok: true, msg: this._port(port) ? "busy" : "available", port: port});
 	}
 
+	/**
+	 * @method start : 
+	 * @param {http.Request} req : 
+	 * @param {http.Response} res : 
+	 * @param {string} type : 
+	 * @param {number} port : 
+	 */
 	start(req, res, type, port) {
-		this.sendJSON(req, res, 200, this._start(type, port));
+		this.send200(res, this._start(type, port));
 	}
 
 	/**
 	 * @method _start : start server
-	 * @param {string} type : 
-	 * @param {number} port : 
+	 * @param {string} type : tcp io ws udp
+	 * @param {number} port : server port
 	 */
 	_start(type, port) {
 		if(!this.constructors.has(type)) // check server type exists
@@ -72,13 +90,19 @@ class Relay extends ModuleBase {
 		return {ok: true, msg: "server started", uid: uid, type: type, port: port};
 	}
 
+	/**
+	 * @method stop : 
+	 * @param {http.Request} req : 
+	 * @param {http.Response} res : 
+	 * @param {string} uid : 
+	 */
 	stop(req, res, uid) {
-		this.sendJSON(req, res, 200, this._stop(uid));
+		this.send200(res, this._stop(uid));
 	}
 
 	/**
 	 * @method _stop : stop server
-	 * @param {string} uid 
+	 * @param {string} uid : server uid
 	 */
 	_stop(uid) {
 		if(!this.points.has(uid)) // check server exists
@@ -92,8 +116,15 @@ class Relay extends ModuleBase {
 		return {ok: true, msg: "server stopped", uid: uid};
 	}
 
+	/**
+	 * @method pipe : 
+	 * @param {http.Request} req : 
+	 * @param {http.Response} res : 
+	 * @param {string} from : 
+	 * @param {string} to : 
+	 */
 	pipe(req, res, from, to) {
-		this.sendJSON(req, res, 200, this._pipe(from, to));
+		this.send200(res, this._pipe(from, to));
 	}
 
 	/**
@@ -119,7 +150,7 @@ class Relay extends ModuleBase {
 	}
 
 	unpipe(req, res, from, to) {
-		this.sendJSON(req, res, 200, this._unpipe(from, to));
+		this.send200(res, this._unpipe(from, to));
 	}
 
 	/**
@@ -137,39 +168,46 @@ class Relay extends ModuleBase {
 		return {ok: false, msg: "no pipe", from: from, to: to};
 	}
 
+	/**
+	 * @method send : 
+	 * @param {http.Request} req : 
+	 * @param {http.Response} res : 
+	 * @param {string} uid : 
+	 * @param  {...*} data : 
+	 */
 	send(req, res, uid, ...data) {
-		this.sendJSON(req, res, 200, this._send(uid, ...data));
+		this.send200(res, this._send(uid, ...data));
 	}
 
 	/**
 	 * @method _send : send data to server
 	 * @param {string} uid : server uid
-	 * @param  {...*} data : some data
+	 * @param {...*} data : some data
 	 */
 	_send(uid, ...data) {
-		if(!this.points.has(uid)) 
-			return {ok: false, msg: "no server", uid: uid};
-		trace("send", uid, data);
+		if(!this.points.has(uid)) return {ok: false, msg: "no server", uid: uid};
+		console.log("send", uid, data);
 		this.points.get(uid).all(...data);
 		return {ok: true, msg: "sent", uid: uid};
 	}
 
 	/**
 	 * @method _data : all servers data callback
-	 * @param {string} uid 
-	 * @param {*} socket 
-	 * @param {*} data 
+	 * @param {string} uid : server uid
+	 * @param {*} socket : emitter socket
+	 * @param {*} data : received data
 	 */
 	_data(uid, socket, data) {
 		// do something with data before dispatch ?
 		this.pipes.get(uid).forEach(pipeuid => { // pipe data
-			trace("pipe to", pipeuid);
+			console.log("pipe to", pipeuid);
 			this.points.get(pipeuid).all(data); // send to all pipe clients
 		});
 	}
 
 	/**
 	 * @method _uid : generate short uids
+	 * @return {string} generated uid
 	 */
 	_uid() {
 		return (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toLowerCase();

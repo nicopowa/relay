@@ -16,17 +16,17 @@ class UDPServer {
 		//this._server.on("listening", () => {});
 		this._server.bind(this._port);
 
-		trace("udp server start", this._port);
+		console.log("udp server start", this._port);
 	}
 
 	onData(data, socket) {
 		socket.name = socket.address + ":" + socket.port;
 		if(!this._clients.has(socket.name)) {
-			trace("new udp client :", socket.name);
+			console.log("new udp client :", socket.name);
 			this._clients.set(socket.name, {address: socket.address, port: socket.port});
 			return; // helo message, no dispatch
 		}
-		trace("udp data :", socket.name, ">", data);
+		console.log("udp data :", socket.name, ">", data);
 		this._data(socket, data);
 	}
 
@@ -37,17 +37,17 @@ class UDPServer {
 
 	send(socket, data) {
 		this._server.send(data, socket.port, socket.address, err => {
-			if(err) trace("udp send error :", err)
+			if(err) console.log("udp send error :", err)
 		});
 	}
 
 	all(data) {
-		trace("udp send all :", data);
+		console.log("udp send all :", data);
 		this._clients.forEach(socket => this.send(socket, data));
 	}
 	
 	stop() {
-		trace("udp server stop", this._port);
+		console.log("udp server stop", this._port);
 		this._clients.clear();
 		this._server.close();
 	}

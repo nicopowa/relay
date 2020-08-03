@@ -1,4 +1,4 @@
-const io = outload("socket.io");
+const io = require("socket.io");
 
 class IOServer {
 
@@ -14,11 +14,11 @@ class IOServer {
 		this._server = io(port, {});
 		this._server.on("connection", this.onConnect.bind(this));
 		this._server.on("error", this.onError.bind(this));
-		trace("io server start", this._port);
+		console.log("io server start", this._port);
 	}
 
 	onData(socket, data) {
-		trace("io data :", socket.name, ">", data);
+		console.log("io data :", socket.name, ">", data);
 		this._data(socket, data);
 	}
 
@@ -29,7 +29,7 @@ class IOServer {
 
 	onConnect(socket) {
 		socket.name = socket.request.socket._peername.address + ":" + socket.request.socket._peername.port;
-		trace("new io client :", socket.name);
+		console.log("new io client :", socket.name);
 		socket.use(packet => this.onData(socket, packet));
 		socket.on("disconnect", () => this.onDisconnect(socket));
 		this.clients.set(socket.name, socket);
@@ -37,7 +37,7 @@ class IOServer {
 	}
 
 	onDisconnect(socket) {
-		trace("io disconnected :", socket.name);
+		console.log("io disconnected :", socket.name);
 		this.clients.delete(socket.name);
 		this._disconnect(socket);
 	}
@@ -47,7 +47,7 @@ class IOServer {
 	}
 
 	all(...args) {
-		trace("io send all :", args);
+		console.log("io send all :", args);
 		args = args.map(arg => arg.toString("utf8"))
 		if(args.length == 1) args.unshift("message");
 		this._server.sockets.emit(...args);
@@ -55,7 +55,7 @@ class IOServer {
 	}
 	
 	stop() {
-		trace("io server stop", this._port);
+		console.log("io server stop", this._port);
 		this._server.close();
 		this.clients.forEach(socket => socket.destroy()); // disconnect() ?
 		this.clients.clear();

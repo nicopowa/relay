@@ -7,7 +7,9 @@ class TCPClient {
 		this._host = host;
 		this._port = port;
 
-		trace("new tcp client :", this._host + ":" + this._port);
+		console.log("new tcp client :", this._host + ":" + this._port);
+
+		this._connected = false;
 
 		this._connect = onConnect;
 		this._data = onData;
@@ -22,34 +24,42 @@ class TCPClient {
 	}
 
 	onConnect() {
-		//trace("tcp client connected to :", this._host + ":" + this._port);
+		//console.log("tcp client connected to :", this._host + ":" + this._port);
+		this._connected = true;
 		this._connect();
 	}
 
 	onData(data) {
-		//trace("tcp client data :", data);
+		//console.log("tcp client data :", data);
 		this._data(data);
 	}
 
 	onDisconnect() {
-		//trace("tcp client disconnect");
+		//console.log("tcp client disconnect");
+		this._connected = false;
 		this._disconnect();
 	}
 
 	onError(err) {
-		//trace("tcp client error", err);
+		//console.log("tcp client error", err);
 		//this.close(); // ??
+		//this._connected = false;
 		this._error(err);
 	}
 
 	send(data) {
-		trace("tcp client send :", data);
+		console.log("tcp client send :", data);
 		this._socket.write(data);
 	}
 
 	stop() {
-		trace("tcp client stop");
+		console.log("tcp client stop");
 		this._socket.destroy();
+		this._connected = false;
+	}
+
+	get connected() {
+		return this._connected;
 	}
 
 }
